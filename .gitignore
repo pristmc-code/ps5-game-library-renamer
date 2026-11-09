@@ -22,3 +22,7 @@ __BACKUPS/
 *.bak
 .playwright-mcp/
 HANDOFF.md
+
+# Android (estudo local, fora do repositorio publico)
+android/
+*.apk
