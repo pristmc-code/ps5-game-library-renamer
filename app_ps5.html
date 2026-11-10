@@ -79,6 +79,7 @@
   .novo { color: var(--novo); }
   .novo::before { content: "→ "; color: var(--muted); }
   .local { color: var(--muted); font-size: 12px; }
+  .local .peso { color: var(--text); font-weight: 600; }
   td.st { width: 1%; white-space: nowrap; text-align: right; }
   td.st button { margin-top: 4px; padding: 3px 10px; font-size: 13px; }
   .filtros { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
@@ -224,12 +225,12 @@ const TEXTOS = {
     pasta_nao_testada: "não testada — clique em Conectar", pasta_existe: "✅ existe ({n} {itens})", item: "item", itens: "itens",
     pasta_nao_existe: "❌ não existe", sem_pastas_ini: "nenhuma pasta configurada no INI",
     filtro_encontrados: "Encontrados ({n})", filtro_nao: "Não encontrados ({n})", filtro_todos: "Todos ({n})",
-    tt_filtro_nao: "Itens sem código no nome, códigos não encontrados e patches/backports",
+    tt_filtro_nao: "Itens sem código no nome, códigos não encontrados, patches/backports e downloads em andamento",
     th_jogo: "Jogo", th_arquivo: "Arquivo: atual → novo", th_status: "Status", th_nome_arquivo: "Nome para arquivo",
     vazio_ftp: "Clique em Conectar para ler as pastas do PS5.", vazio_sem_codigo: "Nenhum item neste filtro.",
     vazio_manual: "Nenhuma consulta ainda. (Ctrl+Enter também consulta.)",
     resumo: "{total} itens · {cod} com código · {prontos} prontos · {ok} NOME OK · {conf} conflitos",
-    st_patch: "patch/backport: não é renomeado", st_sem_codigo: "sem código no nome", st_consultando: "consultando…", st_nome_ok: "NOME OK", st_nome_ok_agora: "NOME OK (renomeado agora)",
+    st_patch: "patch/backport: não é renomeado", st_baixando: "download em andamento: não é renomeado", st_sem_codigo: "sem código no nome", st_consultando: "consultando…", st_nome_ok: "NOME OK", st_nome_ok_agora: "NOME OK (renomeado agora)",
     st_conflito_existe: "já existe item com esse nome", st_conflito_duplo: "outro item vai ficar com o mesmo nome",
     tam_caminho: "caminho + nome: {n} caracteres", tam_novo: "depois de renomear: {n}",
     tam_smp_longo: "nome longo demais para o ShadowMountPlus ({n} caracteres sem a extensão; máximo {max})",
@@ -252,7 +253,7 @@ const TEXTOS = {
     ph_entrada: "Cole um ou vários códigos (PPSA08329, CUSA10249, ppsa-08330...) ou até uma lista de nomes de arquivos: o app acha os códigos sozinho.",
     btn_consultar: "Consultar", btn_limpar: "Limpar", btn_copiar_todos: "Copiar todos os nomes", btn_txt: "Baixar TXT", btn_csv: "Baixar CSV",
     e_protocolo_invalido: "protocolo deve ser FTP ou SFTP", e_informe_ip: "informe o IP/endereço do PS5",
-    e_falha_sftp: "falha no SFTP: {detalhe}", e_nome_invalido: "nome inválido", e_origem_sumiu: "'{nome}' não existe mais na pasta",
+    e_falha_sftp: "falha no SFTP: {detalhe}", e_nome_invalido: "nome inválido", e_origem_sumiu: "'{nome}' não existe mais na pasta", e_em_download: "'{nome}' ainda está sendo baixado: espere terminar e busque de novo",
     e_destino_existe: "já existe '{nome}' na pasta", e_sem_pastas: "nenhuma pasta configurada em {ini}",
   },
   en: {
@@ -275,12 +276,12 @@ const TEXTOS = {
     pasta_nao_testada: "not tested — click Connect", pasta_existe: "✅ exists ({n} {itens})", item: "item", itens: "items",
     pasta_nao_existe: "❌ does not exist", sem_pastas_ini: "no folder configured in the INI",
     filtro_encontrados: "Found ({n})", filtro_nao: "Not found ({n})", filtro_todos: "All ({n})",
-    tt_filtro_nao: "Items without a code in the name, codes not found and patches/backports",
+    tt_filtro_nao: "Items without a code in the name, codes not found, patches/backports and downloads in progress",
     th_jogo: "Game", th_arquivo: "File: current → new", th_status: "Status", th_nome_arquivo: "File name",
     vazio_ftp: "Click Connect to read the PS5 folders.", vazio_sem_codigo: "No items in this filter.",
     vazio_manual: "No lookups yet. (Ctrl+Enter also searches.)",
     resumo: "{total} items · {cod} with code · {prontos} ready · {ok} NAME OK · {conf} conflicts",
-    st_patch: "patch/backport: not renamed", st_sem_codigo: "no code in the name", st_consultando: "looking up…", st_nome_ok: "NAME OK", st_nome_ok_agora: "NAME OK (just renamed)",
+    st_patch: "patch/backport: not renamed", st_baixando: "download in progress: not renamed", st_sem_codigo: "no code in the name", st_consultando: "looking up…", st_nome_ok: "NAME OK", st_nome_ok_agora: "NAME OK (just renamed)",
     st_conflito_existe: "an item with this name already exists", st_conflito_duplo: "another item would get the same name",
     tam_caminho: "path + name: {n} characters", tam_novo: "after renaming: {n}",
     tam_smp_longo: "name too long for ShadowMountPlus ({n} characters without the extension; max {max})",
@@ -303,7 +304,7 @@ const TEXTOS = {
     ph_entrada: "Paste one or more codes (PPSA08329, CUSA10249, ppsa-08330...) or even a list of file names: the app finds the codes by itself.",
     btn_consultar: "Look up", btn_limpar: "Clear", btn_copiar_todos: "Copy all names", btn_txt: "Download TXT", btn_csv: "Download CSV",
     e_protocolo_invalido: "protocol must be FTP or SFTP", e_informe_ip: "enter the PS5 IP/address",
-    e_falha_sftp: "SFTP failure: {detalhe}", e_nome_invalido: "invalid name", e_origem_sumiu: "'{nome}' no longer exists in the folder",
+    e_falha_sftp: "SFTP failure: {detalhe}", e_nome_invalido: "invalid name", e_origem_sumiu: "'{nome}' no longer exists in the folder", e_em_download: "'{nome}' is still downloading: wait for it to finish and search again",
     e_destino_existe: "'{nome}' already exists in the folder", e_sem_pastas: "no folder configured in {ini}",
   },
   es: {
@@ -326,12 +327,12 @@ const TEXTOS = {
     pasta_nao_testada: "no probada — haga clic en Conectar", pasta_existe: "✅ existe ({n} {itens})", item: "elemento", itens: "elementos",
     pasta_nao_existe: "❌ no existe", sem_pastas_ini: "ninguna carpeta configurada en el INI",
     filtro_encontrados: "Encontrados ({n})", filtro_nao: "No encontrados ({n})", filtro_todos: "Todos ({n})",
-    tt_filtro_nao: "Elementos sin código en el nombre, códigos no encontrados y parches/backports",
+    tt_filtro_nao: "Elementos sin código en el nombre, códigos no encontrados, parches/backports y descargas en curso",
     th_jogo: "Juego", th_arquivo: "Archivo: actual → nuevo", th_status: "Estado", th_nome_arquivo: "Nombre de archivo",
     vazio_ftp: "Haga clic en Conectar para leer las carpetas de la PS5.", vazio_sem_codigo: "Ningún elemento en este filtro.",
     vazio_manual: "Ninguna consulta todavía. (Ctrl+Enter también consulta.)",
     resumo: "{total} elementos · {cod} con código · {prontos} listos · {ok} NOMBRE OK · {conf} conflictos",
-    st_patch: "parche/backport: no se renombra", st_sem_codigo: "sin código en el nombre", st_consultando: "consultando…", st_nome_ok: "NOMBRE OK", st_nome_ok_agora: "NOMBRE OK (renombrado ahora)",
+    st_patch: "parche/backport: no se renombra", st_baixando: "descarga en curso: no se renombra", st_sem_codigo: "sin código en el nombre", st_consultando: "consultando…", st_nome_ok: "NOMBRE OK", st_nome_ok_agora: "NOMBRE OK (renombrado ahora)",
     st_conflito_existe: "ya existe un elemento con ese nombre", st_conflito_duplo: "otro elemento quedaría con el mismo nombre",
     tam_caminho: "ruta + nombre: {n} caracteres", tam_novo: "después de renombrar: {n}",
     tam_smp_longo: "nombre demasiado largo para ShadowMountPlus ({n} caracteres sin la extensión; máximo {max})",
@@ -354,7 +355,7 @@ const TEXTOS = {
     ph_entrada: "Pegue uno o varios códigos (PPSA08329, CUSA10249, ppsa-08330...) o incluso una lista de nombres de archivo: la app encuentra los códigos sola.",
     btn_consultar: "Consultar", btn_limpar: "Limpiar", btn_copiar_todos: "Copiar todos los nombres", btn_txt: "Descargar TXT", btn_csv: "Descargar CSV",
     e_protocolo_invalido: "el protocolo debe ser FTP o SFTP", e_informe_ip: "indique la IP/dirección de la PS5",
-    e_falha_sftp: "fallo de SFTP: {detalhe}", e_nome_invalido: "nombre inválido", e_origem_sumiu: "'{nome}' ya no existe en la carpeta",
+    e_falha_sftp: "fallo de SFTP: {detalhe}", e_nome_invalido: "nombre inválido", e_origem_sumiu: "'{nome}' ya no existe en la carpeta", e_em_download: "'{nome}' todavía se está descargando: espere a que termine y busque de nuevo",
     e_destino_existe: "ya existe '{nome}' en la carpeta", e_sem_pastas: "ninguna carpeta configurada en {ini}",
   },
 };
@@ -653,7 +654,7 @@ function recalcular() {
   for (const it of itensFtp) (existentes[it.pasta] ??= new Set()).add(it.nome);
   for (const it of itensFtp) {
     // Patch/backport não ganha nome novo (nem entra na conta de nomes repetidos).
-    it.novo = !it.patch && it.info?.status === "ok" ? it.info.nome_arquivo + extensao(it) : "";
+    it.novo = !it.patch && !it.baixando && it.info?.status === "ok" ? it.info.nome_arquivo + extensao(it) : "";
     it.encurtado = !!it.novo && nomeLongoSmp(it, it.novo);
     if (it.encurtado) it.novo = encurtarNome(it.info.nome_arquivo, MAX_NOME_IMAGEM_SMP) + extensao(it);
     if (it.novo && it.novo !== it.nome) {
@@ -663,6 +664,7 @@ function recalcular() {
   }
   for (const it of itensFtp) {
     if (it.estado === "renomeando") continue;
+    if (it.baixando) { it.estado = "neutro"; it.msg = ["st_baixando"]; continue; }  // download em andamento (.part etc.)
     if (it.patch) { it.estado = "neutro"; it.msg = ["st_patch"]; continue; }  // patch/backport: nunca renomeia
     if (!it.codigo) { it.estado = "neutro"; it.msg = ["st_sem_codigo"]; continue; }
     if (!it.info || it.info.status === "pendente") { it.estado = "pendente"; it.msg = ["st_consultando"]; continue; }
@@ -689,9 +691,18 @@ function celTamanho(it) {
   return html;
 }
 
+// Tamanho do arquivo como no Explorer do Windows (base 1024): 45,2 GB, 812 MB...
+function tamanhoArquivo(bytes) {
+  const unidades = ["B", "KB", "MB", "GB", "TB"];
+  let valor = bytes, u = 0;
+  while (valor >= 1024 && u < unidades.length - 1) { valor /= 1024; u++; }
+  const casas = u === 0 || valor >= 100 ? 0 : 1;
+  return valor.toLocaleString(idioma, { minimumFractionDigits: casas, maximumFractionDigits: casas }) + " " + unidades[u];
+}
+
 const textoMsg = msg => !msg ? "" : msg[0] === "#status" ? tStatus(msg[1]) : t(msg[0], msg[1]);
 
-const categoriaFtp = it => it.patch || !it.codigo || (it.info && !["ok", "pendente"].includes(it.info.status)) ? "nao" : "encontrados";
+const categoriaFtp = it => it.patch || it.baixando || !it.codigo || (it.info && !["ok", "pendente"].includes(it.info.status)) ? "nao" : "encontrados";
 
 function renderizarFtp() {
   // Filtro: encontrados (jogo achado, ou ainda consultando) / não encontrados (sem código no nome
@@ -728,7 +739,7 @@ function renderizarFtp() {
       <td>
         <div class="arq">${icone} ${esc(it.nome)}</div>
         ${it.novo && it.novo !== it.nome ? `<div class="arq novo">${esc(it.novo)}</div>` : ""}
-        <div class="local">${esc(it.pasta)}</div>
+        <div class="local">${esc(it.pasta)}${it.tamanho != null ? ` · <span class="peso">${esc(tamanhoArquivo(it.tamanho))}</span>` : ""}</div>
         ${celTamanho(it)}
       </td>
       <td class="st"><div class="${classe[it.estado] || ""}">${esc(textoMsg(it.msg))}</div>
@@ -782,7 +793,7 @@ async function renomearItem(i, emLote = false) {
   const it = itensFtp[i];
   it.estado = "renomeando"; it.msg = ["st_renomeando"]; renderizarFtp();
   try {
-    const r = await postJson("/api/renomear", { ...conexao(), pasta: it.pasta, de: it.nome, para: it.novo });
+    const r = await postJson("/api/renomear", { ...conexao(), pasta: it.pasta, de: it.nome, para: it.novo, tamanho: it.tamanho ?? null });
     it.estado = "";
     if (r.ok) { it.nome = it.novo; it.renomeado = true; it.erroRenomear = ""; if (!emLote) avisar(t("av_renomeado")); }
     else { it.erroRenomear = tErro(r); }

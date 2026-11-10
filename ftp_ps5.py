@@ -13,7 +13,7 @@ import stat
 import sys
 from pathlib import Path
 
-VERSAO = "1.0"
+VERSAO = "1.1"
 
 # Empacotado (PyInstaller): dados (INI, cache, base, icones) ao lado do .exe e recursos (HTML)
 # na pasta interna do pacote. Rodando como script: tudo na pasta do script.
@@ -213,7 +213,9 @@ class ClienteFtp:
                 tipo = fatos.get("type", "")
                 if nome in (".", "..") or tipo in ("cdir", "pdir"):
                     continue
-                itens.append({"nome": nome, "tipo": "pasta" if tipo == "dir" else "arquivo"})
+                tamanho = fatos.get("size", "")
+                itens.append({"nome": nome, "tipo": "pasta" if tipo == "dir" else "arquivo",
+                              "tamanho": int(tamanho) if tamanho.isdigit() else None})
             return itens
         except ftplib.error_perm:
             itens = []
@@ -229,7 +231,8 @@ class ClienteFtp:
                 nome = nome.split(" -> ", 1)[0]
             if nome in (".", ".."):
                 continue
-            itens.append({"nome": nome, "tipo": "pasta" if linha.startswith("d") else "arquivo"})
+            itens.append({"nome": nome, "tipo": "pasta" if linha.startswith("d") else "arquivo",
+                          "tamanho": int(partes[4]) if partes[4].isdigit() else None})
         return itens
 
     def renomear(self, origem: str, destino: str) -> None:
@@ -263,7 +266,8 @@ class ClienteSftp:
             return False
 
     def listar(self, pasta: str) -> list[dict]:
-        return [{"nome": a.filename, "tipo": "pasta" if stat.S_ISDIR(a.st_mode or 0) else "arquivo"}
+        return [{"nome": a.filename, "tipo": "pasta" if stat.S_ISDIR(a.st_mode or 0) else "arquivo",
+                 "tamanho": a.st_size}
                 for a in self.sftp.listdir_attr(pasta) if a.filename not in (".", "..")]
 
     def renomear(self, origem: str, destino: str) -> None:
@@ -293,6 +297,23 @@ def eh_patch(nome: str) -> bool:
     return bool(RE_PATCH.search(nome))
 
 
+# Downloads em andamento: lojas, navegadores e clientes torrent gravam o arquivo com uma terminacao
+# temporaria (ex.: BlackBox "jogo.exfat.part") e so tiram no fim. Renomear no meio quebraria o download.
+SUFIXOS_DOWNLOAD = (".part", ".partial", ".crdownload", ".download", ".opdownload", ".fdmdownload",
+                    ".tmp", ".temp", ".incomplete", ".filepart", ".dtapart", ".!qb", ".!ut", ".!bt",
+                    ".bc!", ".az!", ".!sync", ".xltd", ".td", ".aria2")
+RE_DOWNLOAD = re.compile(r"\.part\d+$|^\.syncthing\.|^~", re.IGNORECASE)  # .part1 (JDownloader), Syncthing
+
+
+def em_download(nome: str, nomes_da_pasta: set[str] = frozenset()) -> bool:
+    """Nome temporario de download, ou arquivo com o controle do downloader ao lado (aria2: jogo.exfat
+    + jogo.exfat.aria2; outros: jogo.exfat + jogo.exfat.part), que grava direto no nome final."""
+    baixo = nome.lower()
+    if baixo.endswith(SUFIXOS_DOWNLOAD) or RE_DOWNLOAD.search(nome):
+        return True
+    return any(nome + sufixo in nomes_da_pasta for sufixo in (".aria2", ".part", ".partial", ".tmp"))
+
+
 def compactado(item: dict) -> bool:
     nome = item["nome"].lower()
     return item["tipo"] == "arquivo" and (nome.endswith(EXTENSOES_COMPACTADAS) or bool(RE_PARTE_COMPACTADA.search(nome)))
@@ -315,11 +336,14 @@ def escanear(conexao: dict, pastas: list[str]) -> dict:
                 estado["existe"] = cliente.existe_pasta(pasta)
                 if not estado["existe"]:
                     continue
-                for item in cliente.listar(pasta):
+                listagem = cliente.listar(pasta)
+                nomes = {item["nome"] for item in listagem}
+                for item in listagem:
                     # So arquivos: pastas e compactados ficam fora da lista.
                     if item["tipo"] != "arquivo" or compactado(item):
                         continue
-                    item.update(pasta=pasta, codigo=extrair_codigo(item["nome"]), patch=eh_patch(item["nome"]))
+                    item.update(pasta=pasta, codigo=extrair_codigo(item["nome"]), patch=eh_patch(item["nome"]),
+                                baixando=em_download(item["nome"], nomes))
                     itens.append(item)
                     estado["qtd"] += 1
             except ERROS_CONEXAO as erro:
@@ -333,16 +357,21 @@ def _nome_seguro(nome: str) -> bool:
     return bool(nome) and nome not in (".", "..") and "/" not in nome and "\\" not in nome
 
 
-def renomear(conexao: dict, pasta: str, de: str, para: str) -> None:
-    """Renomeia pasta/de -> pasta/para (mesma pasta, sem mover entre diretorios)."""
+def renomear(conexao: dict, pasta: str, de: str, para: str, tamanho: int | None = None) -> None:
+    """Renomeia pasta/de -> pasta/para (mesma pasta, sem mover entre diretorios).
+    tamanho: o da busca; se mudou desde entao, o arquivo ainda esta sendo gravado e nao e renomeado."""
     if not _nome_seguro(de) or not _nome_seguro(para):
         raise ErroApp("nome_invalido", "nome invalido")
     cliente = conectar(conexao)
     try:
         # Alguns servidores sobrescrevem o destino no rename: confere antes para nunca apagar nada.
-        existentes = {item["nome"] for item in cliente.listar(pasta)}
+        listagem = cliente.listar(pasta)
+        existentes = {item["nome"] for item in listagem}
         if de not in existentes:
             raise ErroApp("origem_sumiu", f"'{de}' nao existe mais na pasta", nome=de)
+        atual = next(item.get("tamanho") for item in listagem if item["nome"] == de)
+        if em_download(de, existentes) or (tamanho is not None and atual is not None and atual != tamanho):
+            raise ErroApp("em_download", f"'{de}' ainda esta sendo baixado", nome=de)
         if para in existentes:
             raise ErroApp("destino_existe", f"ja existe '{para}' na pasta", nome=para)
         cliente.renomear(posixpath.join(pasta, de), posixpath.join(pasta, para))

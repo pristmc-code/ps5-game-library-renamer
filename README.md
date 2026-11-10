@@ -32,6 +32,10 @@ CUSA07408 God of War.pkg   →  God_of_War-CUSA07408-US-PS4.pkg
 - Only files are renamed: folders and compressed files (`.zip`, `.rar`, `.7z`...) are ignored.
 - Patches and backports (file name with `patch`, `backport` or `update`) are listed but never renamed,
   so they do not get the game's name.
+- **Downloads in progress are never renamed**: temporary names (`.part`, `.part1`, `.crdownload`, `.!qB`,
+  `.!ut`, `.aria2`...) and files with a downloader control file next to them (`game.exfat` + `game.exfat.aria2`)
+  are listed but skipped, and a file whose size changed since the search is refused at rename time.
+- Each file shows its **size** next to its folder.
 
 ## Install
 

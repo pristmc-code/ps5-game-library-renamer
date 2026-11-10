@@ -247,7 +247,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({"ok": True, "removidos": limpar_cache()})
             elif rota == "/api/renomear":
                 ftp_ps5.renomear(_conexao(dados), str(dados.get("pasta", "")),
-                                 str(dados.get("de", "")), str(dados.get("para", "")))
+                                 str(dados.get("de", "")), str(dados.get("para", "")),
+                                 dados.get("tamanho") if isinstance(dados.get("tamanho"), int) else None)
                 self._json({"ok": True})
             else:
                 self._responder(404, b"Nao encontrado", "text/plain; charset=utf-8")
