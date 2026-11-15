@@ -714,11 +714,14 @@ function renderizarFtp() {
     b.title = b.dataset.filtro === "nao" ? t("tt_filtro_nao") : "";
     b.classList.toggle("ativo", b.dataset.filtro === filtroFtp);
   }
-  // Itens que já estavam com NOME OK ao CONECTAR vão para o final da lista; os demais mantêm a
-  // ordem das pastas. Quem foi renomeado agora fica onde está, para dar para ver o novo nome.
-  const okAoConectar = it => it.estado === "feito" && !it.renomeado;
+  // Renomear primeiro: em cima o que precisa renomear (pronto, conflito, falhou ao renomear); no meio o que não
+  // se renomeia ou ainda está consultando (patch, sem código, baixando, não encontrado); no final o que já estava
+  // com NOME OK ao CONECTAR. Cada grupo mantém a ordem das pastas. Quem foi renomeado agora fica onde está, para
+  // dar para ver o novo nome.
+  const grupo = it => it.estado === "feito" && !it.renomeado ? 2
+    : ["pronto", "conflito", "renomeando"].includes(it.estado) || it.pronto || it.renomeado ? 0 : 1;
   const visiveis = itensFtp.map((it, i) => [it, i]).filter(([it]) => filtroFtp === "todos" || categoriaFtp(it) === filtroFtp)
-    .sort(([a, ia], [b, ib]) => okAoConectar(a) - okAoConectar(b) || ia - ib);
+    .sort(([a, ia], [b, ib]) => grupo(a) - grupo(b) || ia - ib);
   const qtd = s => itensFtp.filter(it => it.estado === s).length;
   $("btnRenomearTodos").textContent = t("btn_renomear_todos", { n: qtd("pronto") });
   $("btnRenomearTodos").disabled = renomeandoTodos || !qtd("pronto");

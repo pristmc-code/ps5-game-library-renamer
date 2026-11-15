@@ -36,6 +36,8 @@ CUSA07408 God of War.pkg   →  God_of_War-CUSA07408-US-PS4.pkg
   `.!ut`, `.aria2`...) and files with a downloader control file next to them (`game.exfat` + `game.exfat.aria2`)
   are listed but skipped, and a file whose size changed since the search is refused at rename time.
 - Each file shows its **size** next to its folder.
+- **Rename first**: the list shows on top what still has to be renamed, then what is never renamed (or is
+  still being looked up), and at the bottom what already had the right name.
 
 ## Install
 
