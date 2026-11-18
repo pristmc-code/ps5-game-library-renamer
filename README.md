@@ -38,6 +38,15 @@ CUSA07408 God of War.pkg   →  God_of_War-CUSA07408-US-PS4.pkg
 - Each file shows its **size** next to its folder.
 - **Rename first**: the list shows on top what still has to be renamed, then what is never renamed (or is
   still being looked up), and at the bottom what already had the right name.
+- **Check for updates at Sony** (1.3, tab "Versions (Sony)"): with the
+  [glibren](https://github.com/pristmc-code/ps5-glibren-releases) payload (0.9.37 or newer) running on the PS5, the app
+  reads each game's installed version and minimum firmware, asks Sony's update server for the newest version of each
+  game and the firmware it needs, shows the result and sends it to glibren, which shows it in its own game list.
+  The PS5 itself never talks to Sony. The first time, pair the PC with glibren (a code shows on the TV). Sony's
+  server uses its own root certificate ("SCEI DNAS Root 05", SHA-1 signed): the app trusts only that certificate, and
+  only for Sony's update servers (`scei_dnas_root05.pem`). PS4 games (glibren 0.9.38+) are checked on Sony's PS4
+  update server, at the address built from the title ID as in
+  [andshrew/PS4-Updates-Python](https://github.com/andshrew/PS4-Updates-Python); their firmware is shown as a PS4 one.
 
 ## Install
 
@@ -114,6 +123,8 @@ The installer is written to `instalador\saida\`.
 ## Credits
 
 - Title database: [andshrew/PlayStation-Titles](https://github.com/andshrew/PlayStation-Titles) (MIT).
+- Update check: how to find the version files from [andshrew/PS5-Updates-Python](https://github.com/andshrew/PS5-Updates-Python) and
+  [andshrew/PS4-Updates-Python](https://github.com/andshrew/PS4-Updates-Python) (MIT; PS4 key credited to a gist by Zer0xFF).
 - Game pages and covers: [prosperopatches.com](https://prosperopatches.com) and [orbispatches.com](https://orbispatches.com).
 - FTP payload: [ps5-payload-dev/ftpsrv](https://github.com/ps5-payload-dev/ftpsrv).
 

@@ -24,6 +24,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import base_titulos
 import foco
 import ftp_ps5
+import versoes_sony
 import icones
 import janela
 from consulta_ps5 import CAMPOS, SITES, consultar, nome_para_arquivo, normalizar
@@ -93,6 +94,7 @@ def limpar_cache() -> int:
 
 
 _conexao = ftp_ps5.normalizar_conexao
+_versoes = versoes_sony.Versoes()   # 1.3: aba Versoes (Sony)
 
 # ---------------------------------------------------------------- vida da tela
 # Com a janela propria, fechar a janela encerra o app. Na reserva (tela no navegador padrao), a
@@ -180,6 +182,8 @@ class Handler(BaseHTTPRequestHandler):
             r = consultar_com_cache(codigo)
             self._json({"title_id": r["title_id"], "icone": r["icone"], "publisher": r["publisher"],
                         "status": r["status"], "cache": r["cache"]})
+        elif url.path == "/api/versoes/estado":
+            self._json(_versoes.estado())
         elif url.path == "/api/config":
             self._json({**ftp_ps5.ler_config(), "cache_qtd": len(_cache_consultas), "icones_qtd": icones.quantidade(), "base": base_titulos.estado()})
         else:
@@ -242,6 +246,18 @@ class Handler(BaseHTTPRequestHandler):
                 ftp_ps5.ler_config()  # garante que o arquivo existe
                 subprocess.Popen(["notepad.exe", str(ftp_ps5.ARQUIVO_INI)])
                 foco.trazer_janela_com_titulo(ftp_ps5.ARQUIVO_INI.name)
+                self._json({"ok": True})
+            elif rota == "/api/versoes/conectar":
+                _versoes.conectar(str(dados.get("ip", "")))
+                self._json({"ok": True})
+            elif rota == "/api/versoes/pedir-codigo":
+                _versoes.pedir_codigo()
+                self._json({"ok": True})
+            elif rota == "/api/versoes/parear":
+                _versoes.parear(str(dados.get("codigo", "")))
+                self._json({"ok": True})
+            elif rota == "/api/versoes/consultar":
+                _versoes.consultar()
                 self._json({"ok": True})
             elif rota == "/api/limpar-cache":
                 self._json({"ok": True, "removidos": limpar_cache()})

@@ -42,7 +42,7 @@ Push-Location $projeto
 try {
     python -m PyInstaller --noconfirm --clean --windowed --name GameLibraryRenamer `
         --icon "$instalador\icone.ico" --version-file "$instalador\versao.txt" `
-        --add-data "$projeto\app_ps5.html;." --add-data "$instalador\icone.ico;." `
+        --add-data "$projeto\app_ps5.html;." --add-data "$instalador\icone.ico;." --add-data "$projeto\scei_dnas_root05.pem;." `
         --hidden-import paramiko `
         --distpath $dist --workpath "$trabalho\build" --specpath "$trabalho\build" app_ps5.py
     if ($LASTEXITCODE -ne 0) { throw "PyInstaller falhou" }

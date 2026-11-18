@@ -13,7 +13,7 @@ import stat
 import sys
 from pathlib import Path
 
-VERSAO = "1.2"
+VERSAO = "1.3"
 
 # Empacotado (PyInstaller): dados (INI, cache, base, icones) ao lado do .exe e recursos (HTML)
 # na pasta interna do pacote. Rodando como script: tudo na pasta do script.

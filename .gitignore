@@ -26,3 +26,5 @@ HANDOFF.md
 # Android (estudo local, fora do repositorio publico)
 android/
 *.apk
+glibren.json
+glibren.tmp

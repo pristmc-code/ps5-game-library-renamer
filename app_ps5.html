@@ -28,7 +28,7 @@
   .dica, .meta, .local, .sub, .progresso, th, .campos label, footer { font-weight: 500; }
   main { flex: 1; min-height: 0; width: 100%; max-width: 1180px; margin: 0 auto; padding: 16px 5px 8px;
          display: flex; flex-direction: column; }
-  #abaFtp, #abaManual { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #abaFtp, #abaManual, #abaVersoes { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .card.lista { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-bottom: 0; }
   .rolagem { flex: 1; min-height: 0; overflow: auto; }
   .rolagem thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }
@@ -62,6 +62,18 @@
   .abas button.ativa { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
   .abas .cache { margin-left: auto; }
   .oculta { display: none !important; }
+  /* 1.3: aba Versoes (Sony) */
+  .ver-h2 { font-size: 17px; margin: 0; }
+  .ver-botoes { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+  .ver-msg { margin-top: 8px; font-size: 14px; min-height: 1.3em; overflow-wrap: anywhere; }
+  .ver-msg.ok, .ver-dia { color: var(--ok); } .ver-msg.bad, .ver-alerta, .ver-nova.alerta { color: var(--err); }
+  .ver-msg.info { color: var(--muted); }
+  .ver-nova { color: var(--accent); font-weight: 700; }
+  .ver-alerta { font-weight: 700; font-size: 13px; }
+  .ver-erro { color: var(--warn); font-size: 13px; overflow-wrap: anywhere; }
+  .ver-barra { height: 6px; background: var(--ph); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .ver-barra > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  #verCorpo td { vertical-align: top; }
   .pastas { margin: 6px 0 0; padding-left: 18px; font: 13px Consolas, monospace; }
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -126,6 +138,7 @@
   <nav class="abas">
     <button class="ativa" data-aba="abaFtp" data-i18n="aba_ftp"></button>
     <button data-aba="abaManual" data-i18n="aba_manual"></button>
+    <button data-aba="abaVersoes" data-i18n="aba_versoes"></button>
     <span class="dica cache"><span id="baseInfo"></span> · <span id="cacheInfo"></span> · <span id="iconesInfo"></span> · <a href="#" id="lnkLimparCache" data-i18n="limpar_cache"></a></span>
   </nav>
 
@@ -197,6 +210,44 @@
       </div>
     </section>
   </div>
+  <!-- ===================== ABA VERSOES (1.3) ===================== -->
+  <div id="abaVersoes" class="oculta">
+    <section class="card">
+      <h2 class="ver-h2" data-i18n="ver_titulo"></h2>
+      <p class="dica" style="margin:4px 0 8px" data-i18n="ver_dica"></p>
+      <div class="campos">
+        <label><span data-i18n="ver_lbl_ip"></span> <input id="verIp" placeholder="192.168.0.20" size="18" autocomplete="off"></label>
+        <div class="ver-botoes">
+          <button id="verConectar" data-i18n="ver_btn_conectar"></button>
+          <button class="primario" id="verConsultar" data-i18n="ver_btn_consultar"></button>
+        </div>
+      </div>
+      <div class="ver-msg" id="verMsg"></div>
+      <div class="ver-barra" id="verBarra" hidden><i id="verProg"></i></div>
+      <div id="verParear" hidden>
+        <p class="dica" style="margin:8px 0 6px" data-i18n="ver_dica_parear"></p>
+        <div class="campos">
+          <label><span data-i18n="ver_lbl_codigo"></span> <input id="verCodigo" maxlength="6" size="8" inputmode="numeric" autocomplete="off"></label>
+          <div class="ver-botoes">
+            <button id="verPedir" data-i18n="ver_btn_pedir"></button>
+            <button class="primario" id="verBtnParear" data-i18n="ver_btn_parear"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="card lista">
+      <div class="linha" style="margin-top:0;margin-bottom:8px">
+        <div class="filtros" id="verFiltros"><button data-f="todos"></button><button data-f="novos"></button></div>
+        <span class="progresso" id="verFw"></span>
+      </div>
+      <div class="rolagem">
+        <table>
+          <thead><tr><th data-i18n="th_jogo"></th><th data-i18n="ver_th_ps5"></th><th data-i18n="ver_th_sony"></th></tr></thead>
+          <tbody id="verCorpo"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </main>
 <footer>Game Library Renamer <span id="versao"></span><span class="selo">developed by <b>PristMC</b></span></footer>
 <div id="aviso"></div>
@@ -210,6 +261,8 @@ const TEXTOS = {
     sub: "Nomes da base local (andshrew/PlayStation-Titles, atualizada ao abrir o app); ícones e o que faltar vêm do prosperopatches.com (PS5), orbispatches.com (PS4) e PS Store. Formato do nome: <code>Nome_do_Jogo-PPSAXXXXX-US-PS5</code>.",
     btn_sair: "Sair", encerrado: "O Game Library Renamer foi encerrado. Pode fechar esta aba.",
     aba_ftp: "Renomear no PS5", aba_manual: "Consulta manual",
+    aba_versoes: "Versões (Sony)", ver_titulo: "Consultar atualizações na Sony", ver_dica: "O glibren (payload do PS5, porta 8765) lista os jogos com a versão de cada um. Este app consulta o servidor de atualizações da Sony e manda o resultado ao glibren, que mostra o aviso na lista dele. O PS5 nunca fala com a Sony.", ver_lbl_ip: "IP do PS5 com o glibren", ver_btn_conectar: "Conectar ao glibren", ver_btn_consultar: "Consultar atualizações na Sony", ver_btn_pedir: "Pedir código", ver_btn_parear: "Parear", ver_lbl_codigo: "Código da TV", ver_dica_parear: "Para guardar os resultados no PS5, o glibren pede um código: toque em Pedir código e digite o número que aparece na TV.", ver_fw: "Firmware deste PS5: {f}", ver_todos: "Todos ({n})", ver_novos: "Com atualização ({n})", ver_th_ps5: "No PS5", ver_th_sony: "Na Sony", ver_desconhecida: "versão desconhecida", ver_pede: "pede firmware {f}", ver_pede_ps4: "pede firmware de PS4 {f}", ver_existe_ps4: "Existe {v} (pede firmware de PS4 {f})", ver_tambem_ps4: "Também {v} (pede firmware de PS4 {f})", ver_existe: "Existe {v} (pede firmware {f})", ver_existe_sem_fw: "Existe {v}", ver_tambem: "Também {v} (pede firmware {f})", ver_fw_maior: "Firmware maior que o deste PS5 ({c})", ver_em_dia: "Em dia com a Sony ({v})", ver_consultado: "consultado em {d}", ver_ps4: "PS4: por enquanto só a versão local", ver_sem_endereco: "sem endereço de versão no jogo", ver_vazio: "Nenhum jogo nas pastas do glibren.", ver_vazio_novos: "Nenhum jogo com versão mais nova na Sony.",
+    ver_lendo: "Lendo a lista de jogos do glibren. Na primeira vez pode levar um minuto.", ver_sem_resposta: "O glibren não respondeu em {ip}:8765. Confira o IP e se o glibren está aberto no PS5.", ver_glibren_antigo: "Este glibren não tem a lista de versões. Atualize o glibren para a 0.9.37 ou mais nova.", ver_lista: "{n} jogo(s) no glibren, {ps5} com endereço de versão na Sony.", ver_codigo_tv: "O PS5 mostrou um código de 6 números na TV. Digite e toque em Parear.", ver_espere: "Espere {s} s antes de pedir outro código.", ver_recusou: "O glibren recusou: {e}", ver_pareado: "Pareado com o glibren.", ver_codigo_errado: "Código errado. Restam {n} tentativa(s).", ver_codigo_expirou: "O código expirou. Peça outro.", ver_bloqueado: "Muitas tentativas erradas. Espere {s} s.", ver_parear_antes: "Pareie este PC com o glibren antes (o código aparece na TV).", ver_nenhum_ps5: "Nenhum jogo com endereço de versão na Sony no glibren.", ver_consultando: "Consultando a Sony: {a} de {b}", ver_esqueceu: "O glibren esqueceu este PC. Pareie de novo e consulte outra vez.", ver_nao_guardou: "A Sony respondeu, mas o glibren não guardou os resultados ({e}).", ver_pronto: "Pronto: {n} consultado(s), {novas} com versão mais nova, {erros} com erro. O glibren já mostra na lista.", ver_falha: "Falhou: {e}", ver_ip_invalido: "Digite um IP como 192.168.0.20.", ver_codigo_invalido: "O código tem 6 números.", ver_ocupado: "Espere a ação em andamento terminar.", ver_raiz_invalida: "O certificado da Sony guardado no app não abriu. Reinstale o app.",
     base_ok: "Base local: {qtd} títulos", base_baixada: " (baixada {data})", base_carregando: "Base local: carregando…",
     base_indisp: "Base local indisponível (usando só os sites)",
     cache_info: "{n} jogos no cache", icones_info: "{n} ícones salvos", limpar_cache: "limpar cache",
@@ -261,6 +314,8 @@ const TEXTOS = {
     sub: "Names from the local database (andshrew/PlayStation-Titles, updated when the app opens); icons and anything missing come from prosperopatches.com (PS5), orbispatches.com (PS4) and the PS Store. Name format: <code>Game_Name-PPSAXXXXX-US-PS5</code>.",
     btn_sair: "Exit", encerrado: "Game Library Renamer has been closed. You can close this tab.",
     aba_ftp: "Rename on PS5", aba_manual: "Manual lookup",
+    aba_versoes: "Versions (Sony)", ver_titulo: "Check for updates at Sony", ver_dica: "glibren (the PS5 payload, port 8765) lists the games with each one's version. This app asks Sony's update server and sends the result to glibren, which shows the notice in its list. The PS5 never talks to Sony.", ver_lbl_ip: "IP of the PS5 running glibren", ver_btn_conectar: "Connect to glibren", ver_btn_consultar: "Check for updates at Sony", ver_btn_pedir: "Ask for a code", ver_btn_parear: "Pair", ver_lbl_codigo: "Code on the TV", ver_dica_parear: "To save the results on the PS5, glibren asks for a code: click Ask for a code and type the number shown on the TV.", ver_fw: "This PS5's firmware: {f}", ver_todos: "All ({n})", ver_novos: "With update ({n})", ver_th_ps5: "On the PS5", ver_th_sony: "At Sony", ver_desconhecida: "unknown version", ver_pede: "needs firmware {f}", ver_pede_ps4: "needs PS4 firmware {f}", ver_existe_ps4: "{v} is available (needs PS4 firmware {f})", ver_tambem_ps4: "Also {v} (needs PS4 firmware {f})", ver_existe: "{v} is available (needs firmware {f})", ver_existe_sem_fw: "{v} is available", ver_tambem: "Also {v} (needs firmware {f})", ver_fw_maior: "Firmware higher than this PS5's ({c})", ver_em_dia: "Up to date with Sony ({v})", ver_consultado: "checked on {d}", ver_ps4: "PS4: only the local version for now", ver_sem_endereco: "the game has no version address", ver_vazio: "No games in glibren's folders.", ver_vazio_novos: "No game with a newer version at Sony.",
+    ver_lendo: "Reading the game list from glibren. The first time may take a minute.", ver_sem_resposta: "glibren did not answer at {ip}:8765. Check the IP and that glibren is open on the PS5.", ver_glibren_antigo: "This glibren has no version list. Update glibren to 0.9.37 or newer.", ver_lista: "{n} game(s) in glibren, {ps5} with a version address at Sony.", ver_codigo_tv: "The PS5 showed a 6-digit code on the TV. Type it and click Pair.", ver_espere: "Wait {s} s before asking for another code.", ver_recusou: "glibren refused: {e}", ver_pareado: "Paired with glibren.", ver_codigo_errado: "Wrong code. {n} attempt(s) left.", ver_codigo_expirou: "The code expired. Ask for another one.", ver_bloqueado: "Too many wrong attempts. Wait {s} s.", ver_parear_antes: "Pair this PC with glibren first (the code shows on the TV).", ver_nenhum_ps5: "No game with a version address at Sony in glibren.", ver_consultando: "Asking Sony: {a} of {b}", ver_esqueceu: "glibren forgot this PC. Pair again and check again.", ver_nao_guardou: "Sony answered, but glibren did not save the results ({e}).", ver_pronto: "Done: {n} checked, {novas} with a newer version, {erros} with an error. glibren already shows it in its list.", ver_falha: "Failed: {e}", ver_ip_invalido: "Type an IP like 192.168.0.20.", ver_codigo_invalido: "The code has 6 digits.", ver_ocupado: "Wait for the running action to finish.", ver_raiz_invalida: "The Sony certificate stored in the app did not open. Reinstall the app.",
     base_ok: "Local database: {qtd} titles", base_baixada: " (downloaded {data})", base_carregando: "Local database: loading…",
     base_indisp: "Local database unavailable (using websites only)",
     cache_info: "{n} games cached", icones_info: "{n} icons saved", limpar_cache: "clear cache",
@@ -312,6 +367,8 @@ const TEXTOS = {
     sub: "Nombres de la base local (andshrew/PlayStation-Titles, actualizada al abrir la app); los iconos y lo que falte vienen de prosperopatches.com (PS5), orbispatches.com (PS4) y PS Store. Formato del nombre: <code>Nombre_del_Juego-PPSAXXXXX-US-PS5</code>.",
     btn_sair: "Salir", encerrado: "Game Library Renamer se cerró. Puede cerrar esta pestaña.",
     aba_ftp: "Renombrar en PS5", aba_manual: "Consulta manual",
+    aba_versoes: "Versiones (Sony)", ver_titulo: "Consultar actualizaciones en Sony", ver_dica: "glibren (el payload de la PS5, puerto 8765) lista los juegos con la versión de cada uno. Esta app consulta el servidor de actualizaciones de Sony y envía el resultado a glibren, que muestra el aviso en su lista. La PS5 nunca habla con Sony.", ver_lbl_ip: "IP de la PS5 con glibren", ver_btn_conectar: "Conectar a glibren", ver_btn_consultar: "Consultar actualizaciones en Sony", ver_btn_pedir: "Pedir código", ver_btn_parear: "Emparejar", ver_lbl_codigo: "Código de la TV", ver_dica_parear: "Para guardar los resultados en la PS5, glibren pide un código: haga clic en Pedir código y escriba el número que aparece en la TV.", ver_fw: "Firmware de esta PS5: {f}", ver_todos: "Todos ({n})", ver_novos: "Con actualización ({n})", ver_th_ps5: "En la PS5", ver_th_sony: "En Sony", ver_desconhecida: "versión desconocida", ver_pede: "pide firmware {f}", ver_pede_ps4: "pide firmware de PS4 {f}", ver_existe_ps4: "Hay {v} (pide firmware de PS4 {f})", ver_tambem_ps4: "También {v} (pide firmware de PS4 {f})", ver_existe: "Hay {v} (pide firmware {f})", ver_existe_sem_fw: "Hay {v}", ver_tambem: "También {v} (pide firmware {f})", ver_fw_maior: "Firmware mayor que el de esta PS5 ({c})", ver_em_dia: "Al día con Sony ({v})", ver_consultado: "consultado el {d}", ver_ps4: "PS4: por ahora solo la versión local", ver_sem_endereco: "el juego no tiene dirección de versión", ver_vazio: "Ningún juego en las carpetas de glibren.", ver_vazio_novos: "Ningún juego con versión más nueva en Sony.",
+    ver_lendo: "Leyendo la lista de juegos de glibren. La primera vez puede tardar un minuto.", ver_sem_resposta: "glibren no respondió en {ip}:8765. Revise la IP y que glibren esté abierto en la PS5.", ver_glibren_antigo: "Este glibren no tiene la lista de versiones. Actualice glibren a la 0.9.37 o más nueva.", ver_lista: "{n} juego(s) en glibren, {ps5} con dirección de versión en Sony.", ver_codigo_tv: "La PS5 mostró un código de 6 números en la TV. Escríbalo y haga clic en Emparejar.", ver_espere: "Espere {s} s antes de pedir otro código.", ver_recusou: "glibren rechazó: {e}", ver_pareado: "Emparejado con glibren.", ver_codigo_errado: "Código incorrecto. Quedan {n} intento(s).", ver_codigo_expirou: "El código caducó. Pida otro.", ver_bloqueado: "Demasiados intentos incorrectos. Espere {s} s.", ver_parear_antes: "Empareje este PC con glibren antes (el código aparece en la TV).", ver_nenhum_ps5: "Ningún juego con dirección de versión en Sony en glibren.", ver_consultando: "Consultando a Sony: {a} de {b}", ver_esqueceu: "glibren olvidó este PC. Empareje de nuevo y consulte otra vez.", ver_nao_guardou: "Sony respondió, pero glibren no guardó los resultados ({e}).", ver_pronto: "Listo: {n} consultado(s), {novas} con versión más nueva, {erros} con error. glibren ya lo muestra en su lista.", ver_falha: "Falló: {e}", ver_ip_invalido: "Escriba una IP como 192.168.0.20.", ver_codigo_invalido: "El código tiene 6 números.", ver_ocupado: "Espere a que termine la acción en curso.", ver_raiz_invalida: "El certificado de Sony guardado en la app no se abrió. Reinstale la app.",
     base_ok: "Base local: {qtd} títulos", base_baixada: " (descargada {data})", base_carregando: "Base local: cargando…",
     base_indisp: "Base local no disponible (usando solo los sitios)",
     cache_info: "{n} juegos en caché", icones_info: "{n} iconos guardados", limpar_cache: "limpiar caché",
@@ -520,7 +577,8 @@ function celJogo(r, codigo) {
 /* ======================= Topo: abas, idioma, cache, sair ======================= */
 document.querySelectorAll(".abas button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".abas button").forEach(x => x.classList.toggle("ativa", x === b));
-  ["abaFtp", "abaManual"].forEach(id => $(id).classList.toggle("oculta", id !== b.dataset.aba));
+  ["abaFtp", "abaManual", "abaVersoes"].forEach(id => $(id).classList.toggle("oculta", id !== b.dataset.aba));
+  if (b.dataset.aba === "abaVersoes") verAtualizar();
 });
 $("lnkLimparCache").onclick = async e => {
   e.preventDefault();
@@ -948,6 +1006,80 @@ $("corpo").addEventListener("click", e => {
 /* ======================= Sinal de vida ======================= */
 // Avisa o app que a tela está aberta; ao fechar a tela, avisa para o app se encerrar
 // (sem isso ele poderia ficar rodando escondido e prender os arquivos numa atualização).
+
+/* ======================= Versoes (Sony) - 1.3 ======================= */
+// O app consulta a Sony e manda ao glibren (versoes_sony.py); o PS5 nunca fala com a Sony.
+let verEstado = {}, verSoNovos = false, verTimer = 0;
+function verCmp(a, b) {
+  const x = String(a).split(".").map(Number), y = String(b).split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d; }
+  return 0;
+}
+const verTemNova = j => !!(j.sony && j.sony.versao_nova && j.versao_local && verCmp(j.sony.versao_nova, j.versao_local) > 0);
+function verQuando(s) {
+  const d = new Date(s * 1000), dd = n => String(n).padStart(2, "0");
+  return `${dd(d.getDate())}/${dd(d.getMonth() + 1)} ${dd(d.getHours())}:${dd(d.getMinutes())}`;
+}
+function verCelSony(j) {
+  const s = j.sony;
+  if (!j.ps5) return `<span class="dica">${esc(t("ver_sem_endereco"))}</span>`;
+  const ps4 = j.plataforma === "PS4";   // firmware de PS4: so referencia (o PS5 roda jogos de PS4 pela compatibilidade)
+  if (!s) return "";
+  let h = "";
+  if (verTemNova(j)) {
+    const alerta = !ps4 && !!(verEstado.fw && s.fw_exigido && verCmp(s.fw_exigido, verEstado.fw) > 0);
+    h += `<div class="ver-nova${alerta ? " alerta" : ""}">${esc(t(s.fw_exigido ? (ps4 ? "ver_existe_ps4" : "ver_existe") : "ver_existe_sem_fw", { v: s.versao_nova, f: s.fw_exigido }))}</div>`;
+    if (s.outra_versao && s.outra_versao !== s.versao_nova && verCmp(s.outra_versao, j.versao_local) > 0)
+      h += `<div class="dica">${esc(t(ps4 ? "ver_tambem_ps4" : "ver_tambem", { v: s.outra_versao, f: s.outro_fw || "?" }))}</div>`;
+    if (alerta) h += `<div class="ver-alerta">${esc(t("ver_fw_maior", { c: verEstado.fw }))}</div>`;
+  } else if (s.versao_nova) h += `<div class="ver-dia">${esc(t("ver_em_dia", { v: s.versao_nova }))}</div>`;
+  if (s.erro) h += `<div class="ver-erro">${esc(s.erro)}</div>`;
+  if (s.consultado_em) h += `<div class="dica">${esc(t("ver_consultado", { d: verQuando(s.consultado_em) }))}</div>`;
+  return h;
+}
+function verDesenhar() {
+  const e = verEstado;
+  if (document.activeElement !== $("verIp") && !$("verIp").value) $("verIp").value = e.ip || "";
+  const m = e.mensagem && e.mensagem.chave ? t(e.mensagem.chave, e.mensagem.params || {}) : "";
+  $("verMsg").textContent = m;
+  $("verMsg").className = `ver-msg ${e.tipo || "info"}`;
+  for (const id of ["verConectar", "verPedir", "verBtnParear"]) $(id).disabled = !!e.ocupado;
+  $("verConsultar").disabled = !!e.ocupado || !e.conectado || !e.pareado;
+  $("verParear").hidden = !e.conectado || e.pareado;
+  const rodando = e.ocupado && e.total > 0 && e.feitos < e.total;
+  $("verBarra").hidden = !rodando;
+  if (rodando) $("verProg").style.width = `${Math.round(e.feitos * 100 / e.total)}%`;
+  $("verFw").textContent = e.fw ? t("ver_fw", { f: e.fw }) : "";
+  const jogos = (e.jogos || []).slice().sort((a, b) => (verTemNova(b) - verTemNova(a)) || (b.ps5 - a.ps5)
+    || String(a.nome).localeCompare(String(b.nome), idioma));
+  const novos = jogos.filter(verTemNova).length;
+  const [bTodos, bNovos] = $("verFiltros").children;
+  bTodos.textContent = t("ver_todos", { n: jogos.length }); bNovos.textContent = t("ver_novos", { n: novos });
+  bTodos.classList.toggle("ativo", !verSoNovos); bNovos.classList.toggle("ativo", verSoNovos);
+  const vis = verSoNovos ? jogos.filter(verTemNova) : jogos;
+  const html = !vis.length ? `<tr><td colspan="3" class="vazio">${esc(t(jogos.length ? "ver_vazio_novos" : "ver_vazio"))}</td></tr>`
+    : vis.map(j => `<tr><td><div class="jogo">${esc(j.nome || j.titleId)}</div><div class="meta">${esc(j.titleId)} · ${esc(j.plataforma || "")}</div></td>
+      <td>${esc(j.versao_local || t("ver_desconhecida"))}${j.fw_local ? `<div class="dica">${esc(t(j.plataforma === "PS4" ? "ver_pede_ps4" : "ver_pede", { f: j.fw_local }))}</div>` : ""}</td>
+      <td>${verCelSony(j)}</td></tr>`).join("");
+  if ($("verCorpo").dataset.html !== html) { $("verCorpo").innerHTML = html; $("verCorpo").dataset.html = html; }
+}
+async function verAtualizar() {
+  try { verEstado = await (await fetch("/api/versoes/estado")).json(); verDesenhar(); } catch { /* app fechando */ }
+  clearTimeout(verTimer);
+  if (!$("abaVersoes").classList.contains("oculta")) verTimer = setTimeout(verAtualizar, verEstado.ocupado ? 700 : 3000);
+}
+async function verAcao(rota, dados = {}) {
+  try {
+    const r = await postJson(rota, dados);
+    if (!r.ok) avisar(r.chave ? t(r.chave, r.params || {}) : r.erro, 4000);
+  } catch { avisar(t("st_servidor"), 4000); }
+  verAtualizar();
+}
+$("verConectar").onclick = () => verAcao("/api/versoes/conectar", { ip: $("verIp").value.trim() });
+$("verConsultar").onclick = () => verAcao("/api/versoes/consultar");
+$("verPedir").onclick = () => verAcao("/api/versoes/pedir-codigo");
+$("verBtnParear").onclick = () => { const c = $("verCodigo").value.trim(); $("verCodigo").value = ""; verAcao("/api/versoes/parear", { codigo: c }); };
+$("verFiltros").onclick = e => { const b = e.target.closest("button[data-f]"); if (!b) return; verSoNovos = b.dataset.f === "novos"; verDesenhar(); };
 setInterval(() => fetch("/api/ping").catch(() => {}), 5000);
 fetch("/api/ping").catch(() => {});
 // fetch com keepalive (o sendBeacon não envia Content-Type JSON, que o servidor exige).
